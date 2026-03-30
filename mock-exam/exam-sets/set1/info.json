@@ -1,0 +1,11 @@
+{
+  "name": "模拟套题一（基础综合）",
+  "source": "改编自历年真题",
+  "problems": [
+    {"number": 1, "name": "数组统计", "source": "201312-T1", "difficulty": 1},
+    {"number": 2, "name": "数字排序", "source": "201503-T2", "difficulty": 2},
+    {"number": 3, "name": "日期计算", "source": "201509-T2", "difficulty": 2},
+    {"number": 4, "name": "图像旋转", "source": "201503-T1", "difficulty": 1},
+    {"number": 5, "name": "Z字形扫描", "source": "201412-T2", "difficulty": 2}
+  ]
+}

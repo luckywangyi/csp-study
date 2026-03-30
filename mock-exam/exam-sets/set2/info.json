@@ -1,0 +1,11 @@
+{
+  "name": "模拟套题二（进阶挑战）",
+  "source": "改编自历年真题",
+  "problems": [
+    {"number": 1, "name": "折点计数", "source": "201604-T1", "difficulty": 1},
+    {"number": 2, "name": "火车购票", "source": "201609-T2", "difficulty": 2},
+    {"number": 3, "name": "邻域均值", "source": "202104-T2", "difficulty": 3},
+    {"number": 4, "name": "工资计算", "source": "201612-T2", "difficulty": 2},
+    {"number": 5, "name": "何以包邮", "source": "202209-T2", "difficulty": 3}
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "weeks": [
+    {
+      "id": "week1-2",
+      "name": "第 1-2 周：基础巩固",
+      "description": "STL、模拟题、排序",
+      "problems": [
+        { "id": "201612/t1", "name": "中间数", "tags": "排序,计数", "source": "CSP" },
+        { "id": "201312/t1", "name": "出现次数最多的数", "tags": "计数,map", "source": "CSP" },
+        { "id": "201604/t1", "name": "折点计数", "tags": "数组扫描", "source": "CSP" },
+        { "id": "201503/t1", "name": "图像旋转", "tags": "矩阵,模拟", "source": "CSP" },
+        { "id": "202104/t2", "name": "邻域均值", "tags": "前缀和,二维", "source": "CSP" },
+        { "id": "P5660", "name": "[CSP-J2019] 数字游戏", "tags": "模拟", "source": "洛谷" },
+        { "id": "P7071", "name": "[CSP-J2020] 优秀的拆分", "tags": "模拟", "source": "洛谷" },
+        { "id": "P7909", "name": "[CSP-J2021] 分糖果", "tags": "数学", "source": "洛谷" },
+        { "id": "P8813", "name": "[CSP-J2022] 乘方", "tags": "模拟", "source": "洛谷" },
+        { "id": "P9748", "name": "[CSP-J2023] 小苹果", "tags": "模拟", "source": "洛谷" },
+        { "id": "P11227", "name": "[CSP-J2024] 扑克牌", "tags": "模拟", "source": "洛谷" }
+      ]
+    },
+    {
+      "id": "week3-4",
+      "name": "第 3-4 周：中级进阶",
+      "description": "BFS/DFS、贪心、字符串处理",
+      "problems": [
+        { "id": "201312/t2", "name": "ISBN号码", "tags": "字符串", "source": "CSP" },
+        { "id": "P1162", "name": "填涂颜色", "tags": "BFS", "source": "洛谷" },
+        { "id": "P1605", "name": "迷宫", "tags": "DFS,回溯", "source": "洛谷" },
+        { "id": "P5661", "name": "[CSP-J2019] 公交换乘", "tags": "模拟,贪心", "source": "洛谷" },
+        { "id": "P7072", "name": "[CSP-J2020] 直播获奖", "tags": "排序", "source": "洛谷" },
+        { "id": "P8814", "name": "[CSP-J2022] 解密", "tags": "数学", "source": "洛谷" },
+        { "id": "P5657", "name": "[CSP-S2019] 格雷码", "tags": "递归,位运算", "source": "洛谷" },
+        { "id": "P7910", "name": "[CSP-J2021] 插入排序", "tags": "模拟,排序", "source": "洛谷" }
+      ]
+    },
+    {
+      "id": "week5-6",
+      "name": "第 5-6 周：算法强化",
+      "description": "DP、图论、数据结构",
+      "problems": [
+        { "id": "P5662", "name": "[CSP-J2019] 纪念品", "tags": "DP,背包", "source": "洛谷" },
+        { "id": "P7074", "name": "[CSP-J2020] 方格取数", "tags": "DP,网格", "source": "洛谷" },
+        { "id": "P8816", "name": "[CSP-J2022] 上升点列", "tags": "DP", "source": "洛谷" },
+        { "id": "P5663", "name": "[CSP-J2019] 加工零件", "tags": "图论,BFS", "source": "洛谷" },
+        { "id": "P7073", "name": "[CSP-J2020] 表达式", "tags": "树,DFS", "source": "洛谷" },
+        { "id": "P7911", "name": "[CSP-J2021] 网络连接", "tags": "模拟,字符串", "source": "洛谷" },
+        { "id": "P7913", "name": "[CSP-S2021] 廊桥分配", "tags": "模拟,贪心", "source": "洛谷" },
+        { "id": "P9752", "name": "[CSP-S2023] 密码锁", "tags": "枚举", "source": "洛谷" }
+      ]
+    },
+    {
+      "id": "week7-8",
+      "name": "第 7-8 周：模拟冲刺",
+      "description": "套题训练、限时模考",
+      "problems": [
+        { "id": "P8817", "name": "[CSP-S2022] 假期计划", "tags": "BFS,枚举", "source": "洛谷" },
+        { "id": "P8818", "name": "[CSP-S2022] 策略游戏", "tags": "ST表,博弈", "source": "洛谷" },
+        { "id": "P9753", "name": "[CSP-S2023] 消消乐", "tags": "字符串", "source": "洛谷" },
+        { "id": "P9754", "name": "[CSP-S2023] 结构体", "tags": "模拟", "source": "洛谷" },
+        { "id": "P9755", "name": "[CSP-S2023] 种树", "tags": "二分,贪心", "source": "洛谷" },
+        { "id": "P11228", "name": "[CSP-J2024] 地图探险", "tags": "模拟,BFS", "source": "洛谷" },
+        { "id": "P11229", "name": "[CSP-J2024] 小木棍", "tags": "枚举", "source": "洛谷" },
+        { "id": "P11230", "name": "[CSP-J2024] 接龙", "tags": "DP", "source": "洛谷" },
+        { "id": "P11231", "name": "[CSP-S2024] 决斗", "tags": "贪心", "source": "洛谷" },
+        { "id": "P11232", "name": "[CSP-S2024] 超速检测", "tags": "二分", "source": "洛谷" },
+        { "id": "P11233", "name": "[CSP-S2024] 染色", "tags": "DP", "source": "洛谷" },
+        { "id": "P11234", "name": "[CSP-S2024] 擂台游戏", "tags": "数据结构", "source": "洛谷" },
+        { "id": "P5658", "name": "[CSP-S2019] 括号树", "tags": "树,DP", "source": "洛谷" },
+        { "id": "P5664", "name": "[CSP-S2019] Emiya 家今天的饭", "tags": "DP", "source": "洛谷" }
+      ]
+    }
+  ]
+}
