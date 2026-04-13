@@ -1,38 +1,30 @@
+/*
+ * CCF CSP 标准解题模板：头文件、IO 优化、常用别名与常量。
+ * 编译：g++ -std=c++17 -O2 solution.cpp
+ */
 #include <bits/stdc++.h>
 using namespace std;
+
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+constexpr ll INF = 4e18;
+constexpr int MOD = 1e9 + 7;
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n, r, t;
-    [[maybe_unused]] int L;
-    if (!(cin >> n >> L >> r >> t)) return 0;
-    vector<vector<int>> a(n + 1, vector<int>(n + 1));
-    for (int i = 1; i <= n; ++i)
-        for (int j = 1; j <= n; ++j) cin >> a[i][j];
+    // 多测时取消下一行注释
+    // int T; cin >> T; while (T--) {
 
-    vector<vector<long long>> pref(n + 1, vector<long long>(n + 1));
-    for (int i = 1; i <= n; ++i)
-        for (int j = 1; j <= n; ++j)
-            pref[i][j] = a[i][j] + pref[i - 1][j] + pref[i][j - 1] - pref[i - 1][j - 1];
+    // 解题代码
 
-    auto rectSum = [&](int x1, int y1, int x2, int y2) -> long long {
-        return pref[x2][y2] - pref[x1 - 1][y2] - pref[x2][y1 - 1] + pref[x1 - 1][y1 - 1];
-    };
+    // }
 
-    int ans = 0;
-    for (int i = 1; i <= n; ++i) {
-        for (int j = 1; j <= n; ++j) {
-            int x1 = max(1, i - r);
-            int y1 = max(1, j - r);
-            int x2 = min(n, i + r);
-            int y2 = min(n, j + r);
-            long long s = rectSum(x1, y1, x2, y2);
-            int k = (x2 - x1 + 1) * (y2 - y1 + 1);
-            if (s <= 1LL * t * k) ++ans;
-        }
-    }
-    cout << ans << '\n';
     return 0;
 }

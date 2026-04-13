@@ -1,29 +1,30 @@
+/*
+ * CCF CSP 标准解题模板：头文件、IO 优化、常用别名与常量。
+ * 编译：g++ -std=c++17 -O2 solution.cpp
+ */
 #include <bits/stdc++.h>
 using namespace std;
+
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vi = vector<int>;
+using vll = vector<ll>;
+
+constexpr ll INF = 4e18;
+constexpr int MOD = 1e9 + 7;
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    string s;
-    if (!getline(cin, s)) return 0;
-    while (!s.empty() && (s.back() == '\r' || s.back() == '\n')) s.pop_back();
+    // 多测时取消下一行注释
+    // int T; cin >> T; while (T--) {
 
-    string compact;
-    compact.reserve(s.size());
-    for (char c : s)
-        if (c != '-') compact += c;
+    // 解题代码
 
-    int sum = 0;
-    for (int i = 0; i < 9; ++i) sum += (i + 1) * (compact[i] - '0');
-    int r = sum % 11;
-    char correct = (r == 10) ? 'X' : static_cast<char>('0' + r);
-    char given = compact[9];
-    if (given == correct) {
-        cout << "Right\n";
-    } else {
-        s.back() = correct;
-        cout << s << '\n';
-    }
+    // }
+
     return 0;
 }
