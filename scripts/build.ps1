@@ -1,4 +1,4 @@
-﻿#Requires -Version 5.1
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     编译 CSP 练习用的 C++ 源文件（g++ C++17）。
@@ -38,20 +38,28 @@ try {
     $outExe = Join-Path $srcDir 'solution.exe'
     $gppExe = (Get-Command g++ -ErrorAction Stop).Source
 
+    # MinGW ld.exe cannot handle non-ASCII output paths; compile to temp then move back
+    $needTempOut = $outExe -match '[^\x00-\x7F]'
+    if ($needTempOut) {
+        $tempOutExe = Join-Path ([System.IO.Path]::GetTempPath()) 'csp_build_solution.exe'
+        $buildOutExe = $tempOutExe
+    } else {
+        $buildOutExe = $outExe
+    }
+
     if ($CompileDebug) {
-        Write-Info "调试模式：启用 -g、-DDEBUG、-fsanitize=undefined（关闭 -O2）。"
+        Write-Info "调试模式：启用 -g、-DDEBUG（关闭 -O2）。"
         $gppArgs = @(
             '-std=c++17',
             '-g',
             '-DDEBUG',
-            '-fsanitize=undefined',
             '-Wall',
-            '-o', $outExe,
+            '-o', $buildOutExe,
             $resolved
         )
     }
     else {
-        $gppArgs = @('-std=c++17', '-O2', '-Wall', '-o', $outExe, $resolved)
+        $gppArgs = @('-std=c++17', '-O2', '-Wall', '-o', $buildOutExe, $resolved)
     }
 
     Write-Info "正在编译：$resolved"
@@ -76,7 +84,12 @@ try {
             if ($errText.Trim().Length -gt 0) {
                 Write-Host $errText
             }
+            if ($needTempOut) { Remove-Item -LiteralPath $tempOutExe -ErrorAction SilentlyContinue }
             exit $p.ExitCode
+        }
+
+        if ($needTempOut) {
+            Move-Item -LiteralPath $tempOutExe -Destination $outExe -Force
         }
 
         Write-Ok "编译成功，耗时 ${elapsedMs} ms。"

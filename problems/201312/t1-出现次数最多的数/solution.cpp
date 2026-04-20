@@ -15,7 +15,8 @@ using vll = vector<ll>;
 constexpr ll INF = 4e18;
 constexpr int MOD = 1e9 + 7;
 
-int main() {
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -25,6 +26,23 @@ int main() {
     // 解题代码
 
     // }
-
-    return 0;
+    int n;
+    cin >> n;
+    vi arr(9999, 0);
+    for (int i = 0; i < n; i++)
+    {
+        int temp;
+        cin >> temp;
+        arr[temp]++;
+    }
+    int maxCount = 0, result = 0;
+    for (int i = 0; i < arr.size(); i++)
+    {
+        if (arr[i] > maxCount)
+        {
+            maxCount = arr[i];
+            result = i;
+        }
+    }
+    cout << result << endl;
 }

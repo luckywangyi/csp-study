@@ -1,3 +1,24 @@
 {
-  "problems": {}
+  "problems": {
+    "201612/t1": {
+      "status": "solved",
+      "score": 100,
+      "lastAttempt": "2026-04-20"
+    },
+    "201312/t1": {
+      "status": "solved",
+      "score": 100,
+      "lastAttempt": "2026-04-20"
+    },
+    "201604/t1": {
+      "status": "solved",
+      "score": 100,
+      "lastAttempt": "2026-04-20"
+    },
+    "201503/t1": {
+      "status": "solved",
+      "score": 100,
+      "lastAttempt": "2026-04-20"
+    }
+  }
 }

@@ -17,7 +17,9 @@ param(
 
     [int] $MemoryLimitMB = 256,
 
-    [string] $SummaryPath = $null
+    [string] $SummaryPath = $null,
+
+    [string] $Case = $null
 )
 
 $ErrorActionPreference = 'Stop'
@@ -141,6 +143,18 @@ try {
         exit 0
     }
 
+    # 单测试点模式
+    $singleCase = $false
+    if (-not [string]::IsNullOrWhiteSpace($Case)) {
+        $caseFile = Join-Path $testRoot "${Case}.in"
+        if (-not (Test-Path -LiteralPath $caseFile -PathType Leaf)) {
+            Write-Bad "错误：测试点 ${Case}.in 不存在"
+            exit 1
+        }
+        $inFiles = @(Get-Item -LiteralPath $caseFile)
+        $singleCase = $true
+    }
+
     $timeoutMs = [int][math]::Ceiling($TimeLimit * 1000)
     if ($timeoutMs -lt 1) { $timeoutMs = 1 }
     $memLimitBytes = [long]$MemoryLimitMB * 1024 * 1024
@@ -200,6 +214,7 @@ try {
             }
             else {
                 $finished = $true
+                try { $proc.WaitForExit() } catch { }
             }
 
             $sw.Stop()
@@ -255,6 +270,34 @@ try {
                 else {
                     $verdict = 'WA'
                     Write-Bad "[#$idx/$total] $($inFile.Name) => WA 用时：${ms} ms$memInfo"
+
+                    # 保存实际输出到 .actual 文件
+                    $actualFile = Join-Path $testRoot ($base + '.actual')
+                    $utf8 = [System.Text.UTF8Encoding]::new($false)
+                    [System.IO.File]::WriteAllText($actualFile, $actualRaw, $utf8)
+
+                    # 显示期望 vs 实际 diff
+                    $eLines = @($e -split "`n")
+                    $aLines = @($a -split "`n")
+                    $diffLine = -1
+                    $maxLines = [math]::Max($eLines.Count, $aLines.Count)
+                    for ($dl = 0; $dl -lt $maxLines; $dl++) {
+                        $el = if ($dl -lt $eLines.Count) { $eLines[$dl] } else { '' }
+                        $al = if ($dl -lt $aLines.Count) { $aLines[$dl] } else { '' }
+                        if ($el -cne $al) { $diffLine = $dl + 1; break }
+                    }
+                    if ($diffLine -gt 0) {
+                        Write-Host "    第 $diffLine 行不同：" -ForegroundColor DarkYellow
+                    }
+                    $previewMax = 3
+                    Write-Host "    期望：" -ForegroundColor Green -NoNewline
+                    $ep = ($eLines | Select-Object -First $previewMax) -join ' | '
+                    if ($eLines.Count -gt $previewMax) { $ep += ' ...' }
+                    Write-Host $ep -ForegroundColor Green
+                    Write-Host "    实际：" -ForegroundColor Red -NoNewline
+                    $ap = ($aLines | Select-Object -First $previewMax) -join ' | '
+                    if ($aLines.Count -gt $previewMax) { $ap += ' ...' }
+                    Write-Host $ap -ForegroundColor Red
                 }
             }
 
@@ -264,6 +307,30 @@ try {
                 Verdict   = $verdict
                 TimeMs    = $ms
                 MemoryMB  = $peakMB
+            }
+
+            # 单测试点模式：打印完整输入输出
+            if ($singleCase) {
+                Write-Host ''
+                $inputText = [System.IO.File]::ReadAllText($inFile.FullName, [System.Text.Encoding]::UTF8).Trim()
+                Write-Info '--- 输入 ---'
+                Write-Host $inputText
+                if ($hasExpected) {
+                    Write-Info '--- 期望输出 ---'
+                    Write-Host $e -ForegroundColor Green
+                }
+                if ($verdict -ne 'TLE' -and $verdict -ne 'MLE') {
+                    Write-Info '--- 实际输出 ---'
+                    $outColor = if ($verdict -eq 'AC') { 'Green' } else { 'Red' }
+                    Write-Host $a -ForegroundColor $outColor
+                }
+                Write-Host ''
+                # 提示调试
+                $debugInputFile = Join-Path (Split-Path -Parent (Split-Path -Parent $srcDir)) '.debug\debug_input.txt'
+                Write-Host "  调试提示：输入已复制到 .debug/debug_input.txt，按 F5 可断点调试" -ForegroundColor DarkGray
+                $debugDir = Split-Path -Parent $debugInputFile
+                if (-not (Test-Path -LiteralPath $debugDir)) { New-Item -ItemType Directory -Path $debugDir -Force | Out-Null }
+                [System.IO.File]::WriteAllText($debugInputFile, ($inputText + "`n"), [System.Text.UTF8Encoding]::new($false))
             }
         }
         finally {
@@ -304,6 +371,14 @@ try {
     else {
         if ($score -eq 100) {
             Write-Ok "  得分：$score / 100 分（满分通过！）"
+            Write-Host ''
+            Write-Host '  建议：本地测试数据由 gen.cpp 生成，不等同于官方评测。' -ForegroundColor DarkGray
+            Write-Host '  可前往 CCF 官方练习平台 https://sim.csp.thusaac.com 提交验证。' -ForegroundColor DarkGray
+            $hasBrute = Test-Path -LiteralPath (Join-Path $srcDir 'brute.cpp') -PathType Leaf
+            $hasGen = Test-Path -LiteralPath (Join-Path $srcDir 'gen.cpp') -PathType Leaf
+            if ($hasBrute -and $hasGen) {
+                Write-Host '  或运行 .\csp verify 进行对拍验证（brute.cpp + gen.cpp 已就绪）。' -ForegroundColor DarkGray
+            }
         }
         elseif ($score -ge 60) {
             Write-WarnMsg "  得分：$score / 100 分"
@@ -314,6 +389,20 @@ try {
 
         if ($total -lt 10) {
             Write-WarnMsg "  提示：当前仅 $total 个测试点（CSP 标准为 10 个），建议补充更多测试数据以更准确地模拟评分。"
+        }
+
+        # WA 后提示对拍
+        if ($waCount -gt 0) {
+            $hasBruteWA = Test-Path -LiteralPath (Join-Path $srcDir 'brute.cpp') -PathType Leaf
+            $hasGenWA   = Test-Path -LiteralPath (Join-Path $srcDir 'gen.cpp') -PathType Leaf
+            Write-Host ''
+            if ($hasBruteWA -and $hasGenWA) {
+                Write-Host '  提示：运行 .\csp verify 进行对拍，自动定位第一个出错的随机数据' -ForegroundColor DarkYellow
+            }
+            $waPoints = @($results | Where-Object { $_.Verdict -eq 'WA' } | ForEach-Object { $_.TestPoint })
+            $firstWA = $waPoints[0]
+            Write-Host "  提示：运行 .\csp test --case $firstWA 查看出错测试点的完整输入输出" -ForegroundColor DarkYellow
+            Write-Host "  提示：选择「调试当前题目(带输入)」按 F5 可断点调试该测试点" -ForegroundColor DarkYellow
         }
     }
     Write-Host ''

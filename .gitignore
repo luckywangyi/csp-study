@@ -8,6 +8,10 @@
 *.tmp
 _debug_*
 
+# Debug workspace
+.debug/solution.exe
+.debug/debug_input.txt
+
 # IDE
 .vscode/
 .idea/

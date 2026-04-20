@@ -104,7 +104,7 @@ function Save-ProgressData {
 }
 
 function Update-ProblemProgress {
-    param([string]$ProbId, [int]$Score)
+    param([string]$ProbId, [int]$Score, [double]$ElapsedMin = -1)
     if ([string]::IsNullOrWhiteSpace($ProbId)) { return }
     $data = Get-ProgressData
     $now = Get-Date -Format 'yyyy-MM-dd'
@@ -113,6 +113,9 @@ function Update-ProblemProgress {
     $best = [math]::Max($prev, $Score)
     $st = if ($best -ge 100) { 'solved' } else { 'attempted' }
     $entry = [PSCustomObject]@{ status = $st; score = $best; lastAttempt = $now }
+    if ($ElapsedMin -gt 0) {
+        $entry | Add-Member -NotePropertyName 'elapsedMin' -NotePropertyValue $ElapsedMin
+    }
     $data.problems | Add-Member -NotePropertyName $ProbId -NotePropertyValue $entry -Force
     Save-ProgressData $data
 }
@@ -135,7 +138,8 @@ function Show-Help {
     Write-Info 'Commands:'
     Write-Host '  init               Setup compiler + fetch all study plan problems'
     Write-Host '  do    <id>         Start a problem (P1162 or 201312/t1, auto-fetch)'
-    Write-Host '  test  [id]         Run tests (auto-detect in problem dir)'
+    Write-Host '  test  [id] [--case N]  Run tests (--case N runs single test point)'
+    Write-Host '  verify [id]        Stress test solution vs brute (requires gen.cpp + brute.cpp)'
     Write-Host '  build [id]         Compile solution.cpp'
     Write-Host '  exam  [set]        Start mock exam'
     Write-Host '  submit <t1-t5>     Submit mock exam answer'
@@ -151,6 +155,8 @@ function Show-Help {
     Write-Host '  .\csp do P1162         # Start Luogu P1162'
     Write-Host '  .\csp test             # Test in problem dir'
     Write-Host '  .\csp test P1162       # Test a specific problem'
+    Write-Host '  .\csp test --case 3    # Only run test point #3'
+    Write-Host '  .\csp verify 201604/t1 # Stress test vs brute'
     Write-Host '  .\csp exam             # Random mock exam'
     Write-Host '  .\csp submit t1        # Submit problem 1'
     Write-Host ''
@@ -204,23 +210,42 @@ switch ($Command) {
         Write-Info "  solution.cpp  -> edit your solution"
         Write-Info "  testcases/    -> $tcCount test case(s)"
         Write-Host ''
+        # 记录开始时间
+        $timerFile = Join-Path $dir '.timer'
+        [System.IO.File]::WriteAllText($timerFile, (Get-Date -Format 'o'), [System.Text.UTF8Encoding]::new($false))
+
         $dispId = if ($id -match '^[Pp]\d+$') { $id.ToUpper() } else { $id }
         Write-Info "After editing, run:  .\csp test $dispId"
+        Write-Info "Timer started. Elapsed time will show when you run test."
         Write-Host ''
     }
 
     # ─── test ───
     'test' {
-        $cpp = Find-SolutionCpp $Rest
+        # 解析 --case N 参数
+        $caseArg = $null
+        $filteredRest = @()
+        for ($ri = 0; $ri -lt $Rest.Count; $ri++) {
+            if ($Rest[$ri] -eq '--case' -and ($ri + 1) -lt $Rest.Count) {
+                $caseArg = $Rest[$ri + 1]
+                $ri++
+            } else {
+                $filteredRest += $Rest[$ri]
+            }
+        }
+
+        $cpp = Find-SolutionCpp $filteredRest
         if ($null -eq $cpp) {
-            Write-Bad 'Usage: .\csp test [problem-id or path]'
+            Write-Bad 'Usage: .\csp test [problem-id or path] [--case N]'
             Write-Host '  Run inside a problem directory, or specify an id like P1162'
             exit 1
         }
 
         $summaryFile = [System.IO.Path]::GetTempFileName()
         $runScript = Join-Path $Root 'scripts\run.ps1'
-        & $runScript -CppPath $cpp -SummaryPath $summaryFile
+        $runArgs = @{ CppPath = $cpp; SummaryPath = $summaryFile }
+        if ($null -ne $caseArg) { $runArgs['Case'] = $caseArg }
+        & $runScript @runArgs
 
         if (Test-Path -LiteralPath $summaryFile -PathType Leaf) {
             $sumText = [System.IO.File]::ReadAllText($summaryFile, [System.Text.Encoding]::UTF8)
@@ -231,8 +256,41 @@ switch ($Command) {
             }
             $probDir = Split-Path -Parent (Resolve-Path $cpp).Path
             $probId = Get-ProblemIdFromDir $probDir
-            Update-ProblemProgress -ProbId $probId -Score $score
+
+            # 计时功能：读取 .timer 文件并显示用时
+            $elapsedMin = -1
+            $timerFile = Join-Path $probDir '.timer'
+            if (Test-Path -LiteralPath $timerFile -PathType Leaf) {
+                try {
+                    $startStr = [System.IO.File]::ReadAllText($timerFile, [System.Text.Encoding]::UTF8).Trim()
+                    $startTime = [DateTime]::Parse($startStr)
+                    $elapsed = (Get-Date) - $startTime
+                    $elapsedMin = [math]::Round($elapsed.TotalMinutes, 1)
+                    Write-Host ''
+                    if ($elapsedMin -le 20) {
+                        Write-Ok "  用时：$elapsedMin 分钟（CSP T1 目标 ≤ 20 分钟）"
+                    } elseif ($elapsedMin -le 40) {
+                        Write-Warn "  用时：$elapsedMin 分钟（CSP T2 目标 ≤ 40 分钟）"
+                    } else {
+                        Write-Bad "  用时：$elapsedMin 分钟（超时，需提速）"
+                    }
+                } catch { }
+            }
+
+            Update-ProblemProgress -ProbId $probId -Score $score -ElapsedMin $elapsedMin
         }
+    }
+
+    # ─── verify ───
+    'verify' {
+        $cpp = Find-SolutionCpp $Rest
+        if ($null -eq $cpp) {
+            Write-Bad 'Usage: .\csp verify [problem-id or path]'
+            Write-Host '  Requires gen.cpp + brute.cpp in the problem directory.'
+            exit 1
+        }
+        $verifyScript = Join-Path $Root 'scripts\verify.ps1'
+        & $verifyScript -CppPath $cpp
     }
 
     # ─── build ───

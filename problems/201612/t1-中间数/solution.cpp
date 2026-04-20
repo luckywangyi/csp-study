@@ -26,5 +26,34 @@ int main() {
 
     // }
 
-    return 0;
+    int n;
+    cin >> n;
+    vi arr(n);
+    int result = INT_MAX;
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+    for (int i = 0; i < n; i++) {
+        int left = 0;
+        int right = 0;
+        for (int j = 0; j < n; j++) {
+            if (j == i) continue;
+            if (arr[j] < arr[i]) {
+                left ++;
+            } else if (arr[j] > arr[i]) {
+                right ++;
+            }
+        }
+        if (left == right) {
+            int tempres = arr[i];
+            if (tempres < result) {
+                result = tempres;
+            }
+        }
+    }
+    if (result != INT_MAX) {
+        cout << result;
+    } else {
+        cout << -1;
+    }
 }

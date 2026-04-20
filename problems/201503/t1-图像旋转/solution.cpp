@@ -25,6 +25,21 @@ int main() {
     // 解题代码
 
     // }
+    int m, n;
+    cin >> m >> n;
+    vector<vector<int>> arr(m, vector<int>(n));
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> arr[i][j];
+        }
+    }
 
+    for (int i = 0; i < n; i++) {
+        for (int j = m - 1; j >= 0; j--) {
+            if (j < m - 1) cout << ' ';
+            cout << arr[j][i];
+        }
+        cout << '\n';
+    }
     return 0;
 }

@@ -63,6 +63,10 @@ $$S \le t \times k$$
 - 注意边界裁剪：$x_1 = \max(1, i-r)$，$x_2 = \min(n, i+r)$，$y$ 同理（下标从 1 计时）。
 - 判定写为 `S <= t * k` 可避免除法，并与 CCF 公开题面一致。
 
+## 在线验证
+
+本地测试数据由 gen.cpp + brute.cpp 生成。建议前往 [CCF 官方练习平台](https://sim.csp.thusaac.com) 用官方评测数据验证你的解法。
+
 ## 来源 / 链接
 
 CCF CSP 2021年4月（第23次）提高级。

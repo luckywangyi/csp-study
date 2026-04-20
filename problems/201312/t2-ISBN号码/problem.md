@@ -50,3 +50,7 @@ Right
 
 - 输入保证格式正确
 - 校验码范围：0-9 或 X
+
+## 在线验证
+
+本地测试数据由 gen.cpp + brute.cpp 生成。建议前往 [CCF 官方练习平台](https://sim.csp.thusaac.com) 用官方评测数据验证你的解法。

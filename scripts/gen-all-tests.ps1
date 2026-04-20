@@ -111,6 +111,10 @@ foreach ($dir in $problemDirs) {
     Write-Host " $status" -NoNewline -ForegroundColor $color
     Write-Host " $flags" -ForegroundColor DarkGray
 
+    if ($hasGen -and -not $hasBrute) {
+        Write-WarnMsg "    ⚠ 无 brute.cpp：.out 由 solution.cpp 生成，可能不可靠"
+    }
+
     $report += [PSCustomObject]@{
         Path     = $relPath
         InFiles  = $inCount
@@ -159,6 +163,9 @@ if ($Generate) {
         Test-Path -LiteralPath (Join-Path $_ 'gen.cpp') -PathType Leaf
     }
 
+    $genCount = 0
+    $warnCount = 0
+
     foreach ($dir in $genDirs) {
         $relPath = $dir.Replace($StudyRoot, '').TrimStart('\')
         $maxN = 100
@@ -170,9 +177,36 @@ if ($Generate) {
             }
         }
 
+        $hasBrute = Test-Path -LiteralPath (Join-Path $dir 'brute.cpp') -PathType Leaf
+        if (-not $hasBrute) {
+            Write-WarnMsg "  ⚠ $relPath 无 brute.cpp，生成的 .out 可能不可靠"
+            $warnCount++
+        }
+
         Write-Info ('  Generate: ' + $relPath + ' MaxN=' + $maxN)
         & $GenTestsScript -ProblemDir $dir -MaxN $maxN
+
+        # 样例 sanity check：用 problem.md 中的样例验证标程输出
+        $problemMd = Join-Path $dir 'problem.md'
+        $testDir = Join-Path $dir 'testcases'
+        $sampleIn = Join-Path $testDir '1.in'
+        $sampleOut = Join-Path $testDir '1.out'
+        if ((Test-Path -LiteralPath $sampleIn) -and (Test-Path -LiteralPath $sampleOut)) {
+            $outContent = [System.IO.File]::ReadAllText($sampleOut, [System.Text.Encoding]::UTF8).Trim()
+            if ([string]::IsNullOrWhiteSpace($outContent)) {
+                Write-WarnMsg "    ⚠ 1.out 为空，标程可能有问题"
+                $warnCount++
+            }
+        }
+
+        $genCount++
         Write-Host ''
+    }
+
+    Write-Host ''
+    Write-Ok "生成完成：$genCount 个题目"
+    if ($warnCount -gt 0) {
+        Write-WarnMsg "警告：$warnCount 个题目需要注意（缺少 brute.cpp 或输出异常）"
     }
 }
 
