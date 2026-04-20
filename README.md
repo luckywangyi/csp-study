@@ -144,6 +144,58 @@ csp-study/
 - **400 分**: 突破 T4（高级水平）
 - **400+**: T5 拿部分分（竞赛水平）
 
+## 在 CLion 中使用
+
+本项目包含 `CMakeLists.txt`，CLion 打开即可自动加载。
+
+### 打开项目
+
+1. CLion -> Open -> 选择 `csp-study` 文件夹
+2. CLion 自动检测 `CMakeLists.txt`，点击 **Open as Project**
+3. 等待 CMake 加载完成（右下角进度条）
+
+### 选择题目
+
+所有题目自动生成为独立的 CMake target：
+
+- CSP 真题：`csp_201604_t1`、`csp_201312_t2` 等
+- 洛谷题目：`P1162`、`P5660` 等
+
+在工具栏的 **target 下拉列表** 中选择要做的题目即可。
+
+### 编译与调试
+
+| 操作 | 快捷键 |
+|------|--------|
+| 编译 | Ctrl+F9 |
+| 运行 | Shift+F10 |
+| 调试 | Shift+F9 |
+
+### 调试时喂入测试数据
+
+CLion 原生支持 stdin 重定向：
+
+1. 先在终端运行 `.\csp test --case 3`，输入会自动复制到 `.debug/debug_input.txt`
+2. 点击 **Edit Configurations**（target 下拉列表旁的下拉箭头）
+3. 在 **Redirect input from** 中填入：`.debug/debug_input.txt`
+4. 按 Shift+F9 调试，程序会自动读取该测试输入
+
+### 测试与对拍
+
+测试命令在 CLion 内置终端中使用（与命令行完全一致）：
+
+```powershell
+.\csp test             # 测试当前题目
+.\csp test --case 3    # 只跑第 3 个测试点
+.\csp verify           # 对拍验证
+```
+
+### 添加新题目后
+
+如果新增了题目文件夹（如 `.\csp fetch P1234`），需要在 CLion 中重新加载 CMake：
+
+**Tools -> CMake -> Reload CMake Project**（或点击 CMake 面板的刷新按钮）
+
 ## 常见编译命令
 
 ```bash

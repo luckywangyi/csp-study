@@ -15,6 +15,7 @@ _debug_*
 # IDE
 .vscode/
 .idea/
+cmake-build-*/
 *.swp
 *.swo
 *~
