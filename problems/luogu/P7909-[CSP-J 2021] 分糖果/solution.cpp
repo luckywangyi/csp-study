@@ -25,6 +25,16 @@ int main() {
     // 解题代码
 
     // }
+    int n, L, R;
+    cin >> n >> L >> R;
+    int left = L % n;
+    int left2 = R % n;
+    if ((R - L) >=n) {
+        cout << (n - 1);
+        return 0;
+    } else {
+        cout << max(left, left2);
+    }
 
     return 0;
 }

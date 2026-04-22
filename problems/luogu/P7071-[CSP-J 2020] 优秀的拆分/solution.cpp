@@ -25,6 +25,29 @@ int main() {
     // 解题代码
 
     // }
+    int n;
+    cin >> n;
+    if (n % 2 != 0) {
+        cout << -1;
+        return 0;
+    }
+    vi result(25, 0);
+    int count = 0;
+    while (n != 0) {
+        int temp = n;
+        int minus = 1;
+        while (temp >= 2) {
+            temp = temp / 2;
+            minus *= 2;
+        }
+        result[count++] = minus;
+        n -= minus;
+    }
 
+    for (int i = 0; i < count; i++) {
+        cout << result[i];
+        if (i < count - 1) cout << " ";
+    }
+    cout << endl;
     return 0;
 }
