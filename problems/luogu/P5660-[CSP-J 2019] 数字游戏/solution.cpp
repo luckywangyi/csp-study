@@ -25,6 +25,13 @@ int main() {
     // 解题代码
 
     // }
-
+    int num;
+    cin >> num;
+    int count = 0;
+    while (num > 0) {
+        if (num % 10 == 1) count++;
+        num = num / 10;
+    }
+    cout << count;
     return 0;
 }

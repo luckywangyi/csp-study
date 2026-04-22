@@ -69,9 +69,26 @@ if (-not (Get-Command g++ -ErrorAction SilentlyContinue)) {
 
 $gpp = (Get-Command g++ -ErrorAction Stop).Source
 
-$genExe = Join-Path $resolved 'gen.exe'
-$stdExe = Join-Path $resolved 'brute.exe'
 $testDir = Join-Path $resolved 'testcases'
+
+$needTempCompile = $resolved -match '[^\x00-\x7F]'
+if ($needTempCompile) {
+    $tmpCompileDir = Join-Path ([System.IO.Path]::GetTempPath()) "csp_gen_$([System.IO.Path]::GetRandomFileName())"
+    New-Item -ItemType Directory -Path $tmpCompileDir -Force | Out-Null
+    $genExe = Join-Path $tmpCompileDir 'gen.exe'
+    $stdExe = Join-Path $tmpCompileDir 'brute.exe'
+    $tmpGenCpp = Join-Path $tmpCompileDir 'gen.cpp'
+    $tmpStdCpp = Join-Path $tmpCompileDir 'std.cpp'
+    Copy-Item -LiteralPath $genCpp -Destination $tmpGenCpp -Force
+    Copy-Item -LiteralPath $stdCpp -Destination $tmpStdCpp -Force
+    $compileGenSrc = $tmpGenCpp
+    $compileStdSrc = $tmpStdCpp
+} else {
+    $genExe = Join-Path $resolved 'gen.exe'
+    $stdExe = Join-Path $resolved 'brute.exe'
+    $compileGenSrc = $genCpp
+    $compileStdSrc = $stdCpp
+}
 
 Write-Info "========== 测试数据生成 =========="
 Write-Info "题目目录：$resolved"
@@ -83,7 +100,7 @@ Write-Host ''
 
 # 编译 gen.cpp
 Write-Info "[1/3] 编译数据生成器 gen.cpp ..."
-$p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $genExe, $genCpp) `
+$p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $genExe, $compileGenSrc) `
     -NoNewWindow -Wait -PassThru
 if ($p.ExitCode -ne 0) {
     Write-Bad "gen.cpp 编译失败"
@@ -93,7 +110,7 @@ Write-Ok "  gen.exe 编译成功"
 
 # 编译 brute.cpp / solution.cpp
 Write-Info "[2/3] 编译暴力标程 ..."
-$p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $stdExe, $stdCpp) `
+$p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $stdExe, $compileStdSrc) `
     -NoNewWindow -Wait -PassThru
 if ($p.ExitCode -ne 0) {
     Write-Bad "标程编译失败"
@@ -204,3 +221,6 @@ else {
 # 清理临时可执行文件
 Remove-Item -LiteralPath $genExe -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $stdExe -ErrorAction SilentlyContinue
+if ($needTempCompile -and (Test-Path -LiteralPath $tmpCompileDir)) {
+    Remove-Item -LiteralPath $tmpCompileDir -Recurse -Force -ErrorAction SilentlyContinue
+}

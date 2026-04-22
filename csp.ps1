@@ -52,7 +52,7 @@ function Resolve-ProblemDir {
         return $null
     }
 
-    if (Test-Path -LiteralPath $Id -PathType Container) { return (Resolve-Path $Id).Path }
+    if (Test-Path -LiteralPath $Id -PathType Container) { return (Resolve-Path -LiteralPath $Id).Path }
     return $null
 }
 
@@ -71,7 +71,7 @@ function Find-SolutionCpp {
     param([string[]]$CliArgs)
     if ($CliArgs.Count -gt 0) {
         $a = $CliArgs[0]
-        if (Test-Path -LiteralPath $a -PathType Leaf) { return (Resolve-Path $a).Path }
+        if (Test-Path -LiteralPath $a -PathType Leaf) { return (Resolve-Path -LiteralPath $a).Path }
         $d = Resolve-ProblemDir $a
         if ($null -ne $d) {
             $f = Join-Path $d 'solution.cpp'
@@ -254,7 +254,7 @@ switch ($Command) {
             foreach ($line in ($sumText -split "`r?`n")) {
                 if ($line.Trim() -match '^SCORE=(\d+)$') { $score = [int]$Matches[1] }
             }
-            $probDir = Split-Path -Parent (Resolve-Path $cpp).Path
+            $probDir = Split-Path -Parent (Resolve-Path -LiteralPath $cpp).Path
             $probId = Get-ProblemIdFromDir $probDir
 
             # 计时功能：读取 .timer 文件并显示用时

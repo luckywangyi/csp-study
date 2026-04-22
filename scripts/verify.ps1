@@ -72,6 +72,20 @@ try {
     $bruteExe = Join-Path $tempDir 'brute.exe'
     $solExe = Join-Path $tempDir 'solution.exe'
 
+    $needTempSrc = $srcDir -match '[^\x00-\x7F]'
+    if ($needTempSrc) {
+        $compileGenSrc = Join-Path $tempDir 'gen.cpp'
+        $compileBruteSrc = Join-Path $tempDir 'brute.cpp'
+        $compileSolSrc = Join-Path $tempDir 'solution.cpp'
+        Copy-Item -LiteralPath $genCpp -Destination $compileGenSrc -Force
+        Copy-Item -LiteralPath $bruteCpp -Destination $compileBruteSrc -Force
+        Copy-Item -LiteralPath $resolved -Destination $compileSolSrc -Force
+    } else {
+        $compileGenSrc = $genCpp
+        $compileBruteSrc = $bruteCpp
+        $compileSolSrc = $resolved
+    }
+
     Write-Host ''
     Write-Info '========== 对拍验证 =========='
     Write-Info "题目目录：$srcDir"
@@ -81,19 +95,19 @@ try {
 
     # 编译三个程序
     Write-Info '[1/4] 编译 gen.cpp ...'
-    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $genExe, $genCpp) `
+    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $genExe, $compileGenSrc) `
         -NoNewWindow -Wait -PassThru
     if ($p.ExitCode -ne 0) { Write-Bad 'gen.cpp 编译失败'; exit 1 }
     Write-Ok '  gen.exe OK'
 
     Write-Info '[2/4] 编译 brute.cpp ...'
-    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $bruteExe, $bruteCpp) `
+    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $bruteExe, $compileBruteSrc) `
         -NoNewWindow -Wait -PassThru
     if ($p.ExitCode -ne 0) { Write-Bad 'brute.cpp 编译失败'; exit 1 }
     Write-Ok '  brute.exe OK'
 
     Write-Info '[3/4] 编译 solution.cpp ...'
-    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $solExe, $resolved) `
+    $p = Start-Process -FilePath $gpp -ArgumentList @('-std=c++17', '-O2', '-o', $solExe, $compileSolSrc) `
         -NoNewWindow -Wait -PassThru
     if ($p.ExitCode -ne 0) { Write-Bad 'solution.cpp 编译失败'; exit 1 }
     Write-Ok '  solution.exe OK'

@@ -133,7 +133,7 @@ try {
         exit 0
     }
 
-    $inFiles = @(Get-ChildItem -LiteralPath $testRoot -Filter '*.in' -File | Sort-Object { $_.Name })
+    $inFiles = @(Get-ChildItem -LiteralPath $testRoot -Filter '*.in' -File | Sort-Object { [int]($_.BaseName -replace '[^\d]', '0') })
     if ($inFiles.Count -eq 0) {
         Write-WarnMsg "testcases 目录下没有 .in 文件，进入交互模式。"
         Write-Info "运行：$exePath"
@@ -181,11 +181,32 @@ try {
         $stdoutFile = [System.IO.Path]::GetTempFileName()
         $stderrFile = [System.IO.Path]::GetTempFileName()
         try {
-            $proc = Start-Process -FilePath $exePath `
-                -RedirectStandardInput $inFile.FullName `
-                -RedirectStandardOutput $stdoutFile `
-                -RedirectStandardError $stderrFile `
-                -NoNewWindow -PassThru -WorkingDirectory $srcDir
+            # 使用 .NET Process API 避免 PowerShell 对路径中 [] 的通配符解析
+            $psi = [System.Diagnostics.ProcessStartInfo]::new()
+            $psi.FileName = $exePath
+            $psi.WorkingDirectory = $srcDir
+            $psi.UseShellExecute = $false
+            $psi.CreateNoWindow = $true
+            $psi.RedirectStandardInput = $true
+            $psi.RedirectStandardOutput = $false
+            $psi.RedirectStandardError = $false
+            $psi.StandardInputEncoding = [System.Text.UTF8Encoding]::new($false)
+
+            # stdout/stderr 重定向到临时文件（通过 cmd /c 包装）
+            $escapedExe = $exePath -replace '"', '\"'
+            $psi.FileName = 'cmd.exe'
+            $psi.Arguments = "/c `"`"$escapedExe`" 1>`"$stdoutFile`" 2>`"$stderrFile`"`""
+            $psi.WorkingDirectory = $srcDir
+
+            $proc = [System.Diagnostics.Process]::new()
+            $proc.StartInfo = $psi
+            $null = $proc.Start()
+
+            # 写入 stdin 并关闭（通过 BaseStream 避免 BOM）
+            $inputBytes = [System.IO.File]::ReadAllBytes($inFile.FullName)
+            $proc.StandardInput.BaseStream.Write($inputBytes, 0, $inputBytes.Length)
+            $proc.StandardInput.BaseStream.Flush()
+            $proc.StandardInput.Close()
 
             $sw = [System.Diagnostics.Stopwatch]::StartNew()
             $finished = $false
@@ -210,7 +231,7 @@ try {
             if (-not $proc.HasExited) {
                 if (-not $mle) { $finished = $false } # TLE
                 try { $proc.Kill() } catch { }
-                try { $proc.WaitForExit(2000) } catch { }
+                try { $null = $proc.WaitForExit(2000) } catch { }
             }
             else {
                 $finished = $true
@@ -236,10 +257,7 @@ try {
             }
             elseif ($exitCode -ne 0) {
                 $verdict = 'RE'
-                $errTail = ''
-                if (Test-Path -LiteralPath $stderrFile) {
-                    $errTail = ([System.IO.File]::ReadAllText($stderrFile, [System.Text.Encoding]::UTF8)).Trim()
-                }
+                $errTail = ([System.IO.File]::ReadAllText($stderrFile, [System.Text.Encoding]::UTF8)).Trim()
                 Write-Bad "[#$idx/$total] $($inFile.Name) => RE（运行时错误，退出码 $exitCode） 用时：${ms} ms$memInfo"
                 if ($errTail.Length -gt 0) {
                     Write-Host "  $errTail" -ForegroundColor DarkYellow

@@ -38,13 +38,19 @@ try {
     $outExe = Join-Path $srcDir 'solution.exe'
     $gppExe = (Get-Command g++ -ErrorAction Stop).Source
 
-    # MinGW ld.exe cannot handle non-ASCII output paths; compile to temp then move back
-    $needTempOut = $outExe -match '[^\x00-\x7F]'
-    if ($needTempOut) {
-        $tempOutExe = Join-Path ([System.IO.Path]::GetTempPath()) 'csp_build_solution.exe'
+    # MinGW cannot handle paths with non-ASCII chars or special chars like []
+    $hasSpecialChars = ($outExe -match '[^\x00-\x7F]') -or ($resolved -match '[\[\]]')
+    if ($hasSpecialChars) {
+        $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) 'csp_build'
+        if (-not (Test-Path -LiteralPath $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force | Out-Null }
+        $tempOutExe = Join-Path $tempDir 'solution.exe'
+        $tempSrc = Join-Path $tempDir 'solution.cpp'
+        Copy-Item -LiteralPath $resolved -Destination $tempSrc -Force
         $buildOutExe = $tempOutExe
+        $buildSrc = $tempSrc
     } else {
         $buildOutExe = $outExe
+        $buildSrc = $resolved
     }
 
     if ($CompileDebug) {
@@ -55,11 +61,11 @@ try {
             '-DDEBUG',
             '-Wall',
             '-o', $buildOutExe,
-            $resolved
+            $buildSrc
         )
     }
     else {
-        $gppArgs = @('-std=c++17', '-O2', '-Wall', '-o', $buildOutExe, $resolved)
+        $gppArgs = @('-std=c++17', '-O2', '-Wall', '-o', $buildOutExe, $buildSrc)
     }
 
     Write-Info "正在编译：$resolved"
@@ -84,12 +90,13 @@ try {
             if ($errText.Trim().Length -gt 0) {
                 Write-Host $errText
             }
-            if ($needTempOut) { Remove-Item -LiteralPath $tempOutExe -ErrorAction SilentlyContinue }
+            if ($hasSpecialChars) { Remove-Item -LiteralPath $tempOutExe -ErrorAction SilentlyContinue }
             exit $p.ExitCode
         }
 
-        if ($needTempOut) {
-            Move-Item -LiteralPath $tempOutExe -Destination $outExe -Force
+        if ($hasSpecialChars) {
+            [System.IO.File]::Copy($tempOutExe, $outExe, $true)
+            Remove-Item -LiteralPath $tempOutExe -ErrorAction SilentlyContinue
         }
 
         Write-Ok "编译成功，耗时 ${elapsedMs} ms。"

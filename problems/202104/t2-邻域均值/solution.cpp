@@ -15,7 +15,8 @@ using vll = vector<ll>;
 constexpr ll INF = 4e18;
 constexpr int MOD = 1e9 + 7;
 
-int main() {
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -25,6 +26,42 @@ int main() {
     // 解题代码
 
     // }
+    int n, L, r, t;
+    cin >> n >> L >> r >> t;
+    vector<vector<int>> arr(n, vector<int>(n));
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> arr[i][j];
+        }
+    }
 
+    int count = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            int sum = 0;
+            int k = 0;
+            for (int a = 0; a <= 2 * r; a++)
+            {
+                for (int b = 0; b <= 2 * r; b++)
+                {
+                    if ((i - r + a) < 0 || (i - r + a) >= n || (j - r + b) < 0 || (j - r + b) >= n)
+                    {
+                        continue;
+                    }
+                    sum += arr[i - r + a][j - r + b];
+                    k++;
+                }
+            }
+            if (sum <= t * k)
+            {
+                count++;
+            }
+        }
+    }
+    cout << count;
     return 0;
 }

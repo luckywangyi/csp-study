@@ -64,7 +64,7 @@ foreach ($dir in $problemDirs) {
     $outCount = 0
     $pairedCount = 0
 
-    if (Test-Path $testDir) {
+    if (Test-Path -LiteralPath $testDir) {
         $inFiles = @(Get-ChildItem -LiteralPath $testDir -Filter '*.in' -File)
         $outFiles = @(Get-ChildItem -LiteralPath $testDir -Filter '*.out' -File)
         $inCount = $inFiles.Count
@@ -157,6 +157,42 @@ if ($Generate) {
         'problems\201604\t1' = 200
         'problems\201612\t1' = 1000
         'problems\202104\t2' = 100
+
+        'problems\luogu\P1162'  = 60
+        'problems\luogu\P1605'  = 5
+        'problems\luogu\P5657'  = 32
+        'problems\luogu\P5658'  = 20
+        'problems\luogu\P5660'  = 1
+        'problems\luogu\P5661'  = 1500
+        'problems\luogu\P5662'  = 8
+        'problems\luogu\P5663'  = 300
+        'problems\luogu\P5664'  = 20
+        'problems\luogu\P7071'  = 10000
+        'problems\luogu\P7072'  = 2000
+        'problems\luogu\P7073'  = 30
+        'problems\luogu\P7074'  = 5
+        'problems\luogu\P7909'  = 3000
+        'problems\luogu\P7910'  = 50
+        'problems\luogu\P7911'  = 30
+        'problems\luogu\P7913'  = 20
+        'problems\luogu\P8813'  = 1000000
+        'problems\luogu\P8814'  = 20
+        'problems\luogu\P8816'  = 35
+        'problems\luogu\P8817'  = 15
+        'problems\luogu\P8818'  = 80
+        'problems\luogu\P9748'  = 10000
+        'problems\luogu\P9752'  = 8
+        'problems\luogu\P9753'  = 200
+        'problems\luogu\P9754'  = 20
+        'problems\luogu\P9755'  = 5
+        'problems\luogu\P11227' = 52
+        'problems\luogu\P11228' = 25
+        'problems\luogu\P11229' = 500
+        'problems\luogu\P11230' = 8
+        'problems\luogu\P11231' = 5000
+        'problems\luogu\P11232' = 25
+        'problems\luogu\P11233' = 1000
+        'problems\luogu\P11234' = 14
     }
 
     $genDirs = $problemDirs | Where-Object {
