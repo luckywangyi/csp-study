@@ -25,6 +25,16 @@ int main() {
     // 解题代码
 
     // }
-
+    int a, b;
+    cin >> a >> b;
+    int result = 1;
+    for (int i = 0; i < b; i++) {
+        if (result > 1000000000) {
+            cout << -1;
+            return 0;
+        }
+        result *= a;
+    }
+    cout << result;
     return 0;
 }

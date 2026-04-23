@@ -15,7 +15,8 @@ using vll = vector<ll>;
 constexpr ll INF = 4e18;
 constexpr int MOD = 1e9 + 7;
 
-int main() {
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -25,6 +26,31 @@ int main() {
     // 解题代码
 
     // }
-
+    int n;
+    cin >> n;
+    int count = 0;
+    int day = 0;
+    while (n != 0)
+    {
+        int temp = n / 3;
+        int temp2 = n % 3;
+        if (temp2 == 1 && day == 0) day = count + 1;
+        if (temp < 1)
+        {
+            temp = 1;
+            n -= 1;
+        }
+        else if (temp2 == 0)
+        {
+            n -= temp;
+        }
+        else
+        {
+            n -= temp + 1;
+        }
+        count++;
+    }
+    
+    cout << count << " " << day;
     return 0;
 }
