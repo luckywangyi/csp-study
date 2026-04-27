@@ -15,7 +15,8 @@ using vll = vector<ll>;
 constexpr ll INF = 4e18;
 constexpr int MOD = 1e9 + 7;
 
-int main() {
+int main()
+{
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
@@ -25,6 +26,17 @@ int main() {
     // 解题代码
 
     // }
-
+    int n;
+    cin >> n;
+    map<string, int> cards;
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        string temp;
+        cin >> temp;
+        if (cards.find(temp) != cards.end()) continue;
+        cards[temp] = 1;
+        count++;
+    }
+    cout << 52 - count;
     return 0;
 }
