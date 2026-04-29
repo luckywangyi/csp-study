@@ -25,6 +25,29 @@ int main() {
     // 解题代码
 
     // }
-
+    vi nums;
+    string s;
+    cin >> s;
+    for (char c : s) {
+        if (isdigit(c)) {
+            nums.push_back(c - '0');
+        }
+    }
+    int total = 0;
+    for (int i = 0; i < 9; i++) {
+        total += nums[i] * (i + 1);
+    }
+    int test = total % 11;
+    char correct;
+    if (test == 10) correct = 'X';
+    else correct = test + '0';
+    char last = s.back();
+    
+    if (last == correct) {
+        cout << "Right";
+    } else {
+        s.back() = correct;
+        cout << s;
+    }
     return 0;
 }
